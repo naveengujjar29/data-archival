@@ -298,3 +298,8 @@ Using this API, data can be fetched from archival table.
 ```
 These steps ensure comprehensive testing of the **Archival Service** functionalities.
 
+#### Project Snippets
+(images/configurations.png)
+(images/get_data_archival.png)
+(images/manually-trigger.png)
+(images/user-table-assignment.png)
