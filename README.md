@@ -12,7 +12,7 @@ The application follows a **microservices** architecture, comprising several ind
 - **Archival Service:** Handles **archival configuration, execution, and user table assignments**.
 - **DB Service:** Manages the **database schema** and ensures consistency using the **Flyway migration tool**.
 
-[archival-system-design.png](https://postimg.cc/phYX0C9S)
+![Archival Process Flow](images/archival-system-design.png)
 ---
 ## Key Design Decisions
 
