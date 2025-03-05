@@ -3,6 +3,7 @@ package com.archival.archivalservice.controller;
 import com.archival.archivalservice.dto.ArchivalConfigurationDto;
 import com.archival.archivalservice.dto.ArchivalQueryDTO;
 import com.archival.archivalservice.dto.UserTableAssignmentDto;
+import com.archival.archivalservice.exception.PermissionDeniedException;
 import com.archival.archivalservice.service.ArchivalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,9 +12,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * @author Naveen Kumar
+ */
 @RestController
 @RequestMapping("/api/v1/archival")
 public class ArchivalController {
@@ -21,8 +27,8 @@ public class ArchivalController {
     @Autowired
     private ArchivalService archivalService;
 
-    @PostMapping("/configuration")
-    public ResponseEntity<ArchivalConfigurationDto> setArchivalCriteria(@RequestBody ArchivalConfigurationDto dto) throws Exception {
+    @PutMapping("/configuration")
+    public ResponseEntity<ArchivalConfigurationDto> setArchivalCriteria(@RequestBody ArchivalConfigurationDto dto) throws PermissionDeniedException {
         ArchivalConfigurationDto archivalConfigurationDto = this.archivalService.configureTableArchivalSetting(dto);
         return new ResponseEntity<>(archivalConfigurationDto, HttpStatus.CREATED);
     }
@@ -50,7 +56,15 @@ public class ArchivalController {
     @GetMapping("/data/{tableName}")
     public ResponseEntity<List<Map<String, Object>>> getArchivedRecords(
             @PathVariable String tableName,
-            @ModelAttribute ArchivalQueryDTO queryParams) throws Exception {
+            @ModelAttribute ArchivalQueryDTO queryParams) throws Exception, PermissionDeniedException {
+
+        if (queryParams.getStartDate() == null) {
+            queryParams.setStartDate(LocalDateTime.now().minusDays(30));
+        }
+        if (queryParams.getEndDate() == null) {
+            queryParams.setEndDate(LocalDateTime.now());
+        }
+
         List<Map<String, Object>> data = archivalService.getArchivedData(tableName, queryParams);
         return new ResponseEntity(data, HttpStatus.OK);
     }

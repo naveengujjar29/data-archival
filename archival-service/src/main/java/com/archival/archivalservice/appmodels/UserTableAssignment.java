@@ -23,7 +23,7 @@ public class UserTableAssignment {
     private String tableNames; // Stored as a comma-separated string (e.g., "student,example_table")
 
     @CreatedDate
-    @Column(name = "created_date_time", insertable = false, updatable = false, columnDefinition = "TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_date_time", insertable = true, updatable = false, columnDefinition = "TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP")
     private Date createdDateTime;
 
     @UpdateTimestamp

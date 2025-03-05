@@ -8,6 +8,7 @@ import com.archival.archivalservice.apprepository.UserTableAssignmentRepository;
 import com.archival.archivalservice.dto.ArchivalConfigurationDto;
 import com.archival.archivalservice.dto.ArchivalQueryDTO;
 import com.archival.archivalservice.dto.UserTableAssignmentDto;
+import com.archival.archivalservice.exception.PermissionDeniedException;
 import com.archival.archivalservice.utils.ObjectConverter;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -40,7 +41,6 @@ public class ArchivalService {
     @Autowired
     private ArchivalCriteriaRepository archivalCriteriaRepository;
 
-
     @Autowired
     private UserTableAssignmentRepository userTableAssignmentRepository;
 
@@ -58,12 +58,24 @@ public class ArchivalService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public ArchivalConfigurationDto configureTableArchivalSetting(ArchivalConfigurationDto archivalConfigurationDto) throws Exception {
+    public ArchivalConfigurationDto configureTableArchivalSetting(ArchivalConfigurationDto archivalConfigurationDto) throws PermissionDeniedException {
         if (!hasPermissionOnTable(archivalConfigurationDto.getTableName())) {
-            throw new Exception("User does not have permission to configure configuration on this table " + archivalConfigurationDto.getTableName());
+            throw new PermissionDeniedException("User does not have permission to configure configuration on this table " + archivalConfigurationDto.getTableName());
         }
-        ArchivalConfiguration archivalConfiguration = (ArchivalConfiguration) this.objectConverter.convert(archivalConfigurationDto, ArchivalConfiguration.class);
-        archivalConfiguration = this.archivalCriteriaRepository.save(archivalConfiguration);
+        ArchivalConfiguration archivalConfiguration;
+        Optional<ArchivalConfiguration> savedArchivalConfiguration = this.archivalCriteriaRepository.findByTableName((archivalConfigurationDto.getTableName()));
+        if (savedArchivalConfiguration.isPresent()) {
+            archivalConfiguration = savedArchivalConfiguration.get();
+            archivalConfiguration.setTableName(archivalConfigurationDto.getTableName());
+            archivalConfiguration.setArchiveAfter(archivalConfigurationDto.getArchiveAfter());
+            archivalConfiguration.setDeleteAfter(archivalConfigurationDto.getDeleteAfter());
+            archivalConfiguration.setArchivalTimeUnit(archivalConfigurationDto.getArchivalTimeUnit());
+            archivalConfiguration.setDeleteAfterTimeUnit(archivalConfigurationDto.getDeleteAfterTimeUnit());
+        } else {
+            archivalConfiguration = (ArchivalConfiguration) this.objectConverter.convert(archivalConfigurationDto, ArchivalConfiguration.class);
+        }
+
+        archivalConfiguration = this.archivalCriteriaRepository.saveAndFlush(archivalConfiguration);
         ArchivalConfigurationDto savedDto = (ArchivalConfigurationDto) this.objectConverter.convert(archivalConfiguration, ArchivalConfigurationDto.class);
         return savedDto;
     }
@@ -205,11 +217,22 @@ public class ArchivalService {
     }
 
     public UserTableAssignmentDto assignTablesToUser(UserTableAssignmentDto dto) {
-        UserTableAssignment userAssignment = (UserTableAssignment) this.objectConverter.convert(dto, UserTableAssignment.class);
+        Optional<UserTableAssignment> existingAssignment = this.userTableAssignmentRepository.findByUserName(dto.getUserName());
+        UserTableAssignment userAssignment;
+        if (existingAssignment.isPresent()) {
+            // Update existing assignment
+            userAssignment = existingAssignment.get();
+            userAssignment.setUserName(dto.getUserName());
+            userAssignment.setTableNames(dto.getTableNames());
+        } else {
+            userAssignment = (UserTableAssignment) this.objectConverter.convert(dto, UserTableAssignment.class);
+        }
+
         userAssignment = this.userTableAssignmentRepository.save(userAssignment);
-        UserTableAssignmentDto savedDto = (UserTableAssignmentDto) this.objectConverter.convert(userAssignment, UserTableAssignmentDto.class);
-        return savedDto;
+
+        return (UserTableAssignmentDto) this.objectConverter.convert(userAssignment, UserTableAssignmentDto.class);
     }
+
 
     private boolean hasPermissionOnTable(String tableName) {
 
@@ -230,9 +253,9 @@ public class ArchivalService {
         return false;
     }
 
-    public List<Map<String, Object>> getArchivedData(String tableName, ArchivalQueryDTO queryParams) throws Exception {
+    public List<Map<String, Object>> getArchivedData(String tableName, ArchivalQueryDTO queryParams) throws PermissionDeniedException {
         if (!hasPermissionOnTable(tableName)) {
-            throw new Exception("User does not have permission to configure configuration on this table " + tableName);
+            throw new PermissionDeniedException("User does not have permission to configure configuration on this table " + tableName);
         }
         String targetTableName = tableName + ARCHIVAL_TABLE_SUFFIX;
         StringBuilder query = new StringBuilder("SELECT * FROM " + targetTableName);

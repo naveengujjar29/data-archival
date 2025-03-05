@@ -26,9 +26,15 @@ public class ArchivalServiceSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("api/v1/archival/**").permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger/yaml"
+                        ).permitAll()
+                        .requestMatchers("api/v1/archival/**").permitAll()
+                        .anyRequest().authenticated()
                 ).addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -39,6 +45,11 @@ public class ArchivalServiceSecurityConfig {
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
                 throws IOException, ServletException {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
+            String requestURI = httpRequest.getRequestURI();
+            if (requestURI.startsWith("/swagger-ui") || requestURI.startsWith("/v3/api-docs")) {
+                chain.doFilter(request, response);
+                return;
+            }
             String username = httpRequest.getHeader("X-Username");
             String roles = httpRequest.getHeader("X-Roles");
 
