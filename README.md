@@ -12,6 +12,8 @@ The application follows a **microservices** architecture, comprising several ind
 - **Archival Service:** Handles **archival configuration, execution, and user table assignments**.
 - **DB Service:** Manages the **database schema** and ensures consistency using the **Flyway migration tool**.
 
+- **Properties of each service is derived from - https://github.com/naveengujjar29/archival-project-config-repo config project.**
+
 ![Archival Process Flow](images/archival-system-design.png)
 ---
 ## Key Design Decisions
