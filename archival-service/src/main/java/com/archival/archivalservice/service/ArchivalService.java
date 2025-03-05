@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RefreshScope
 public class ArchivalService {
 
     private static final Logger logger = LoggerFactory.getLogger(ArchivalService.class);
@@ -46,6 +49,9 @@ public class ArchivalService {
 
     @Autowired
     private ObjectConverter objectConverter;
+
+    @Value("${scheduler.archive.cron}")
+    private String archiveCron;
 
     @Autowired
     @Qualifier("appDataSource")
@@ -87,7 +93,7 @@ public class ArchivalService {
         return data;
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
+    @Scheduled(cron = "${scheduler.archive.cron}")
     @Transactional
     public void archiveData() {
         logger.info("Starting archival process...");
