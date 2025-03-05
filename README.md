@@ -12,6 +12,7 @@ The application follows a **microservices** architecture, comprising several ind
 - **Archival Service:** Handles **archival configuration, execution, and user table assignments**.
 - **DB Service:** Manages the **database schema** and ensures consistency using the **Flyway migration tool**.
 
+[archival-system-design.png](https://postimg.cc/phYX0C9S)
 ---
 ## Key Design Decisions
 
@@ -206,5 +207,92 @@ POST http://localhost:8084/api/v1/archival/run-now
 Archival process triggered successfully.
 ```
 
+```
+http://localhost:8084/api/v1/archival/data/student?startDate=2024-08-03T10:15:03
+Using this API, data can be fetched from archival table.
+
+[
+    {
+        "id": 10504,
+        "name": "Bob Smith",
+        "email": "bob484@test.org",
+        "date_of_birth": "1996-10-25",
+        "archived_at": "2025-03-05T07:58:58.640+00:00",
+        "created_at": "2024-12-30T17:29:32.000+00:00"
+    },
+    {
+        "id": 19889,
+        "name": "Liam Lewis",
+        "email": "liam9869@test.org",
+        "date_of_birth": "1996-06-02",
+        "archived_at": "2025-03-05T07:58:58.842+00:00",
+        "created_at": "2024-12-30T17:13:29.000+00:00"
+    },
+    {
+        "id": 19705,
+        "name": "Liam Taylor",
+        "email": "liam9685@mail.com",
+        "date_of_birth": "1990-02-02",
+        "archived_at": "2025-03-05T07:58:58.836+00:00",
+        "created_at": "2024-12-30T16:30:27.000+00:00"
+    },
+    {
+        "id": 18419,
+        "name": "Grace Adams",
+        "email": "grace8399@mail.com",
+        "date_of_birth": "2003-09-27",
+        "archived_at": "2025-03-05T07:58:58.808+00:00",
+        "created_at": "2024-12-30T15:54:29.000+00:00"
+    },
+    {
+        "id": 10902,
+        "name": "Henry Miller",
+        "email": "henry882@test.org",
+        "date_of_birth": "2005-01-01",
+        "archived_at": "2025-03-05T07:58:58.651+00:00",
+        "created_at": "2024-12-30T10:35:05.000+00:00"
+    },
+    {
+        "id": 15723,
+        "name": "Noah Brown",
+        "email": "noah5703@test.org",
+        "date_of_birth": "1995-10-29",
+        "archived_at": "2025-03-05T07:58:58.751+00:00",
+        "created_at": "2024-12-30T10:20:22.000+00:00"
+    },
+    {
+        "id": 16757,
+        "name": "Charlie Lee",
+        "email": "charlie6737@demo.net",
+        "date_of_birth": "1993-04-03",
+        "archived_at": "2025-03-05T07:58:58.774+00:00",
+        "created_at": "2024-12-30T10:05:18.000+00:00"
+    },
+    {
+        "id": 16850,
+        "name": "Jack Harris",
+        "email": "jack6830@demo.net",
+        "date_of_birth": "2004-07-29",
+        "archived_at": "2025-03-05T07:58:58.774+00:00",
+        "created_at": "2024-12-30T09:38:42.000+00:00"
+    },
+    {
+        "id": 15629,
+        "name": "Grace Adams",
+        "email": "grace5609@example.com",
+        "date_of_birth": "1991-10-10",
+        "archived_at": "2025-03-05T07:58:58.746+00:00",
+        "created_at": "2024-12-30T09:25:38.000+00:00"
+    },
+    {
+        "id": 14684,
+        "name": "Jack Taylor",
+        "email": "jack4664@mail.com",
+        "date_of_birth": "2003-07-16",
+        "archived_at": "2025-03-05T07:58:58.729+00:00",
+        "created_at": "2024-12-30T09:09:09.000+00:00"
+    }
+]
+```
 These steps ensure comprehensive testing of the **Archival Service** functionalities.
 
