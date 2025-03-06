@@ -15,6 +15,9 @@ The application follows a **microservices** architecture, comprising several ind
 - **Properties of each service is derived from - https://github.com/naveengujjar29/archival-project-config-repo config project.**
 
 ![Archival Process Flow](images/archival-system-design.png)
+
+
+![Sequence Diagram](images/Archival-Service-Sequence-Diagram.png)
 ---
 ## Key Design Decisions
 
@@ -26,6 +29,48 @@ The system utilizes **two PostgreSQL databases**:
 2. **Archival Database (`archival_db`)** – Stores archived data (e.g., `student_archive` table).
 
 Schema migrations are handled using **Flyway**, ensuring consistency across both databases.
+
+## Key Design Decisions
+
+### Archival Process
+#### Approach
+The Archival Service periodically moves data from the application DB to the archival DB based on configurable rules stored in the `archival_criteria` table. The process follows these steps:
+- **Selection**: Identify records older than the `archiveAfter` value based on the `created_at` column.
+- **Archival**: Move selected records to the archival DB.
+- **Cleanup**: Optionally delete records from the application DB after the configured `deleteAfter` period.
+
+#### Assumptions
+- All tables to be archived must include a `created_at` timestamp column.
+- The archival process is designed for small to medium datasets. Batch processing may be required for large datasets.
+
+#### Key Decisions
+##### Choice of PostgreSQL
+The decision to use PostgreSQL for both the Application Database (`archival-app`) and Archival Database (`archival_db`) was driven by several key factors:
+
+- **Robust Transactional Support**
+  - Full ACID compliance ensures reliable data movement.
+  - Prevents data loss or corruption during archival.
+- **Advanced Schema Management with Flyway**
+- **Open-Source and Cost-Effective**
+- **Community Support and Maturity**
+  - Large ecosystem with long-term support.
+
+##### Comparison with Other Database Options
+The following table compares PostgreSQL with other databases considered for the Archival Service:
+
+| **Database**      | **Pros**                                                                                   | **Cons**                                                                                     |
+|-------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| **PostgreSQL**    | - Full ACID compliance ensures transactional integrity <br>- Seamless Flyway integration for schema migrations <br>- Extensible with custom functions and indexes <br>- Open-source and cost-effective <br>- Strong community support | - Higher performance overhead for very large datasets <br>- Steeper learning curve for advanced features |
+| **MySQL**         | - Good performance for read-heavy workloads <br>- Strong community support <br>- Flyway compatible for migrations | - Lacks advanced JSONB support <br>- Less robust transactional support in replication scenarios <br>- Limited extensibility compared to PostgreSQL |
+| **MongoDB**       | - Ideal for unstructured data <br>- Highly scalable with horizontal scaling <br>- Flexible schema design | - Limited ACID support (recent versions only) <br>- Schema-less design complicates `created_at` enforcement <br>- Not ideal for structured archival data |
+| **SQLite**        | - Lightweight and embedded <br>- No server setup required <br>- Simple to use | - Not suited for distributed systems or high concurrency <br>- Lacks replication and scaling options <br>- Limited support for Flyway migrations |
+| **Amazon RDS (Aurora)** | - Managed service with high availability <br>- Compatible with PostgreSQL <br>- Scalable with minimal setup | - Adds cost and cloud dependency <br>- Increased operational complexity <br>- Potential vendor lock-in |
+
+##### Why PostgreSQL Was Chosen
+- **Transactional Integrity**: Ensures reliable data movement between application and archival databases.
+- **Schema Management**: Flyway integration supports schema evolution.
+- **Future-Proofing**: Extensible for potential enhancements like full-text search.
+- **Cost-Effectiveness**: Open-source nature reduces operational expenses.
 
 #### Assumptions
 - Both the **application DB** and **archival DB** use **PostgreSQL**, leveraging its **transactional support and schema migration** features.
@@ -65,7 +110,17 @@ Security is enforced through **JWT authentication** and **Role-Based Access Cont
 
 ## Testing Steps
 
-### User Signup and Authentication
+## User Signup and Authentication
+
+### Admin User Signup
+During development and testing, we allow direct role assignment via the signup API. This approach is taken **only for simplicity in testing**. In a production environment, **role assignment should be handled securely via a bootstrap mechanism** or **admin approval workflow**.
+
+#### 🚨 Security Consideration
+The current implementation allows users to assign roles themselves (`ROLE_ADMIN`, etc.), which is a **security risk**. In a **secure production setup**, roles should be:
+- **Predefined via a database seed/bootstrap process**.
+- **Assigned only by an authorized administrator**.
+
+#### API Request Example:
 
 #### Admin User Signup
 **Request:**
@@ -96,14 +151,14 @@ Content-Type: application/json
 {
     "userName": "localuser",
     "password": "Test",
-    "role": "ROLE_NON_ADMIN"
+    "role": "ROLE_USER"
 }
 ```
 **Response:**
 ```
 {
     "userName": "localuser",
-    "role": "ROLE_NON_ADMIN"
+    "role": "ROLE_USER"
 }
 ```
 
