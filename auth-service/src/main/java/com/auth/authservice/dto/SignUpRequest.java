@@ -15,6 +15,8 @@ public class SignUpRequest implements Serializable {
     @NotBlank
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Role role;
 
     public String getUserName() {

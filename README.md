@@ -112,17 +112,16 @@ Security is enforced through **JWT authentication** and **Role-Based Access Cont
 
 ## User Signup and Authentication
 
-### Admin User Signup
-During development and testing, we allow direct role assignment via the signup API. This approach is taken **only for simplicity in testing**. In a production environment, **role assignment should be handled securely via a bootstrap mechanism** or **admin approval workflow**.
-
-#### 🚨 Security Consideration
-The current implementation allows users to assign roles themselves (`ROLE_ADMIN`, etc.), which is a **security risk**. In a **secure production setup**, roles should be:
-- **Predefined via a database seed/bootstrap process**.
-- **Assigned only by an authorized administrator**.
-
 #### API Request Example:
 
-#### Admin User Signup
+# Authentication Service
+
+## Bootstrap User Setup
+At the time of service startup, a bootstrap user is created using credentials retrieved from the configuration server (`application.properties`). This user is initialized with the default `ROLE_USER` role. Further role assignments can be done via the `/assign-role` API to update user permissions.
+
+## API Endpoints
+
+### **User Signup**
 **Request:**
 ```
 POST http://localhost:8084/api/v1/auth/signup
@@ -130,39 +129,42 @@ Content-Type: application/json
 
 {
     "userName": "adminuser",
-    "password": "Test",
-    "role": "ROLE_ADMIN"
+    "password": "Test"
 }
 ```
 **Response:**
 ```
 {
     "userName": "adminuser",
-    "role": "ROLE_ADMIN"
+    "role": "ROLE_USER"
 }
 ```
+> _By default, the role assigned is `ROLE_USER`._
 
-#### Non-Admin User Signup
+---
+
+### **Assign Role**
 **Request:**
 ```
-POST http://localhost:8084/api/v1/auth/signup
+POST http://localhost:8084/api/v1/auth/assign-role
 Content-Type: application/json
 
 {
-    "userName": "localuser",
-    "password": "Test",
-    "role": "ROLE_USER"
+    "userName": "adminuser",
+    "role": "ROLE_ADMIN"
 }
 ```
 **Response:**
 ```
 {
-    "userName": "localuser",
-    "role": "ROLE_USER"
+    "message": "Role ROLE_ADMIN has been assigned successfully to user adminuser"
 }
 ```
+> _After this request, the user's role is updated to `ROLE_ADMIN`._
 
-#### User Sign-In
+---
+
+### **User Sign-In (Updated Role in Response)**
 **Request:**
 ```
 POST http://localhost:8084/api/v1/auth/signin
@@ -180,6 +182,14 @@ Content-Type: application/json
     "role": "ROLE_ADMIN"
 }
 ```
+> _The updated role (`ROLE_ADMIN`) is reflected in the sign-in response._
+
+---
+
+## Notes
+- The bootstrap user is created automatically on service startup.
+- Role assignment can only be done via the `/assign-role` API.
+- Users always start with `ROLE_USER` and can be elevated to other roles as needed.
 
 ### Archival Configuration
 
