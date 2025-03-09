@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS public.archival_criteria (
     archival_time_unit CHARACTER VARYING(255) COLLATE pg_catalog."default" NOT NULL,
     delete_after INTEGER NOT NULL,
     delete_after_time_unit CHARACTER VARYING(255) COLLATE pg_catalog."default" NOT NULL,
+    archival_column_name CHARACTER VARYING(255) COLLATE pg_catalog."default" NOT NULL,
     created_date_time TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_modified_date_time TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT archival_criteria_pkey PRIMARY KEY (id)
@@ -64,6 +65,7 @@ CREATE TABLE IF NOT EXISTS public.student (
     email character varying(255) COLLATE pg_catalog."default" NOT NULL,
     date_of_birth date NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    modified_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT student_pkey PRIMARY KEY (id),
     CONSTRAINT student_email_key UNIQUE (email)
     ) TABLESPACE pg_default;

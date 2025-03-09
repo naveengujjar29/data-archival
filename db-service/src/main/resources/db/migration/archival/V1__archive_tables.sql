@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.student_archive (
                                                       date_of_birth DATE NOT NULL,
                                                       archived_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                                       created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                                                      modified_at TIMESTAMP WITHOUT TIME ZONE,
                                                       CONSTRAINT student_archive_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 

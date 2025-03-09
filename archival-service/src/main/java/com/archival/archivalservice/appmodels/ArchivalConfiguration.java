@@ -16,14 +16,18 @@ public class ArchivalConfiguration {
     private Long id;
 
     private String tableName;
+
     private int archiveAfter;
 
     @Enumerated(EnumType.STRING)
     private ArchivalTimeUnit archivalTimeUnit;
+
     private int deleteAfter;
 
     @Enumerated(EnumType.STRING)
     private ArchivalTimeUnit deleteAfterTimeUnit;
+
+    private String archivalColumnName;
 
     @Basic
     @CreatedDate
@@ -89,5 +93,13 @@ public class ArchivalConfiguration {
 
     public void setLastModifiedDateTime(Date lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
+    }
+
+    public String getArchivalColumnName() {
+        return archivalColumnName;
+    }
+
+    public void setArchivalColumnName(String archivalColumnName) {
+        this.archivalColumnName = archivalColumnName;
     }
 }

@@ -8,6 +8,7 @@ public class ArchivalConfigurationDto {
     private ArchivalTimeUnit archivalTimeUnit;
     private int deleteAfter;
     private ArchivalTimeUnit deleteAfterTimeUnit;
+    private String archivalColumnName;
 
     public String getTableName() {
         return tableName;
@@ -47,5 +48,13 @@ public class ArchivalConfigurationDto {
 
     public void setDeleteAfterTimeUnit(ArchivalTimeUnit deleteAfterTimeUnit) {
         this.deleteAfterTimeUnit = deleteAfterTimeUnit;
+    }
+
+    public String getArchivalColumnName() {
+        return archivalColumnName;
+    }
+
+    public void setArchivalColumnName(String archivalColumnName) {
+        this.archivalColumnName = archivalColumnName;
     }
 }

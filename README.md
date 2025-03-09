@@ -39,10 +39,6 @@ The Archival Service periodically moves data from the application DB to the arch
 - **Archival**: Move selected records to the archival DB.
 - **Cleanup**: Optionally delete records from the application DB after the configured `deleteAfter` period.
 
-#### Assumptions
-- All tables to be archived must include a `created_at` timestamp column.
-- The archival process is designed for small to medium datasets. Batch processing may be required for large datasets.
-
 #### Key Decisions
 ##### Choice of PostgreSQL
 The decision to use PostgreSQL for both the Application Database (`archival-app`) and Archival Database (`archival_db`) was driven by several key factors:
@@ -244,13 +240,13 @@ Now, `localuser` can configure the `student` table.
 ```
 POST http://localhost:8084/api/v1/archival/configuration
 Content-Type: application/json
-
 {
-    "tableName": "student",
-    "archiveAfter": 30,
-    "archivalTimeUnit": "DAYS",
-    "deleteAfter": 90,
-    "deleteAfterTimeUnit": "DAYS"
+  "tableName": "student",
+  "archiveAfter": 40,
+  "archivalTimeUnit": "DAYS",
+  "deleteAfter": 180,
+  "deleteAfterTimeUnit": "DAYS",
+  "archivalColumnName":"created_at"
 }
 ```
 **Response:**
@@ -259,8 +255,9 @@ Content-Type: application/json
     "tableName": "student",
     "archiveAfter": 40,
     "archivalTimeUnit": "DAYS",
-    "deleteAfter": 90,
-    "deleteAfterTimeUnit": "DAYS"
+    "deleteAfter": 120,
+    "deleteAfterTimeUnit": "DAYS",
+    "archivalColumnName": "created_at"
 }
 ```
 
